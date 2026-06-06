@@ -83,20 +83,44 @@ if btnActualizar:
             )
 
 # ...
-names_ref = list(db.collection(u'names').stream())
-names_dict = list(map(lambda x: x.to_dict(), names_ref))
-names_dataframe = pd.DataFrame(names_dict)
+# -----------------------------------------
+# Diagnóstico Firestore
+# -----------------------------------------
+
+st.write("Paso 1 - Secrets cargados")
 
 try:
+    creds = service_account.Credentials.from_service_account_info(key_dict)
+    st.write("Paso 2 - Credenciales creadas")
+
+    db = firestore.Client(
+        credentials=creds,
+        project="streamlit-app-eeabd"
+    )
+    st.write("Paso 3 - Cliente Firestore creado")
+
+    st.write("Paso 4 - Intentando consultar colección 'names'")
+
     docs = list(db.collection("names").stream())
 
+    st.write("Paso 5 - Consulta ejecutada")
     st.write("Cantidad de documentos encontrados:", len(docs))
 
+    names_dict = []
+
     for doc in docs:
-        st.write(doc.id)
-        st.write(doc.to_dict())
+        data = doc.to_dict()
+
+        st.write("Documento:", doc.id)
+        st.write(data)
+
+        names_dict.append(data)
+
+    names_dataframe = pd.DataFrame(names_dict)
+
+    st.write("Paso 6 - DataFrame creado")
+    st.dataframe(names_dataframe)
+
 except Exception as e:
     st.error("Error consultando Firestore")
     st.exception(e)
-    
-st.dataframe(names_dataframe)
