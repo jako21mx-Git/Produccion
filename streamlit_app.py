@@ -6,6 +6,9 @@ from google.oauth2 import service_account
 import json
 key_dict = json.loads(st.secrets["textkey"])
 
+st.write("Proyecto configurado:")
+st.write(key_dict["project_id"])
+
 creds = service_account.Credentials.from_service_account_info(key_dict)
 db = firestore.Client(credentials=creds, project="streamlit-app-eeabd")
 dbNames = db.collection("names")
@@ -83,4 +86,13 @@ if btnActualizar:
 names_ref = list(db.collection(u'names').stream())
 names_dict = list(map(lambda x: x.to_dict(), names_ref))
 names_dataframe = pd.DataFrame(names_dict)
+
+docs = list(db.collection("names").stream())
+
+st.write("Cantidad de documentos encontrados:", len(docs))
+
+for doc in docs:
+    st.write(doc.id)
+    st.write(doc.to_dict())
+    
 st.dataframe(names_dataframe)
