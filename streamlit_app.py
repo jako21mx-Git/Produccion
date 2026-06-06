@@ -87,12 +87,16 @@ names_ref = list(db.collection(u'names').stream())
 names_dict = list(map(lambda x: x.to_dict(), names_ref))
 names_dataframe = pd.DataFrame(names_dict)
 
-docs = list(db.collection("names").stream())
+try:
+    docs = list(db.collection("names").stream())
 
-st.write("Cantidad de documentos encontrados:", len(docs))
+    st.write("Cantidad de documentos encontrados:", len(docs))
 
-for doc in docs:
-    st.write(doc.id)
-    st.write(doc.to_dict())
+    for doc in docs:
+        st.write(doc.id)
+        st.write(doc.to_dict())
+except Exception as e:
+    st.error("Error consultando Firestore")
+    st.exception(e)
     
 st.dataframe(names_dataframe)
